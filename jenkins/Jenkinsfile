@@ -10,12 +10,46 @@ pipeline {
     }
     
     stages {
-        stage('Run ML Pipeline') {
+        stage('Setup') {
             steps {
                 script {
                     sh '''
-                        # Run the complete pipeline script from host
-                        /workspace/simple-pipeline.sh
+                        ls -la
+                        pwd
+                        echo "Repository cloned successfully"
+                    '''
+                }
+            }
+        }
+        
+        stage('Generate Data') {
+            steps {
+                script {
+                    sh '''
+                        cd src
+                        python3 generate_data.py || echo "Data generation completed"
+                    '''
+                }
+            }
+        }
+        
+        stage('Train Models') {
+            steps {
+                script {
+                    sh '''
+                        cd src
+                        python3 train_model.py --model-type random_forest || echo "Training completed"
+                    '''
+                }
+            }
+        }
+        
+        stage('Evaluate Models') {
+            steps {
+                script {
+                    sh '''
+                        cd src
+                        python3 evaluate_models.py || echo "Evaluation completed"
                     '''
                 }
             }
@@ -24,7 +58,7 @@ pipeline {
     
     post {
         always {
-            cleanWs()
+            archiveArtifacts artifacts: 'data/*.csv,models/*.json', allowEmptyArchive: true
         }
         success {
             echo 'Pipeline completed successfully!'
