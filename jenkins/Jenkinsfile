@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    
+    environment {
+        MLFLOW_TRACKING_URI = 'http://host.docker.internal:5000'
+    }
+    
+    triggers {
+        pollSCM('*/5 * * * *') // Poll every 5 minutes
+    }
+    
+    stages {
+        stage('Run ML Pipeline') {
+            steps {
+                script {
+                    sh '''
+                        # Run the complete pipeline script from host
+                        /workspace/simple-pipeline.sh
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}

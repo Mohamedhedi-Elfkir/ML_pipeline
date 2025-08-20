@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mlflow-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow123
+    volumes:
+      - mlflow_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mlflow-server:
+    build: ./docker
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://mlflow:mlflow123@mlflow-db:5432/mlflow
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: ./mlruns
+    depends_on:
+      - mlflow-db
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./models:/app/models
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workspace
+
+volumes:
+  mlflow_db:
+  jenkins_home:
