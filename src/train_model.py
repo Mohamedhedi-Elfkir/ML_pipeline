@@ -33,8 +33,9 @@ def prepare_features(df):
 def train_model(model_type, X_train, y_train, **params):
     if model_type == 'random_forest':
         model = RandomForestRegressor(
-            n_estimators=params.get('n_estimators', 100),
-            max_depth=params.get('max_depth', None),
+            n_estimators=params.get('n_estimators', 150),  # Improved: more trees
+            max_depth=params.get('max_depth', 10),         # Improved: prevent overfitting
+            min_samples_split=5,                           # Improved: better generalization
             random_state=42
         )
     elif model_type == 'linear_regression':
