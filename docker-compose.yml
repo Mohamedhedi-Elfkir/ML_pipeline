@@ -11,6 +11,8 @@ services:
       - mlflow_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - ml-network
 
   mlflow-server:
     build: ./docker
@@ -24,6 +26,8 @@ services:
     volumes:
       - ./mlruns:/app/mlruns
       - ./models:/app/models
+    networks:
+      - ml-network
 
   jenkins:
     image: jenkins/jenkins:lts
@@ -34,7 +38,13 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workspace
+    networks:
+      - ml-network
 
 volumes:
   mlflow_db:
   jenkins_home:
+
+networks:
+  ml-network:
+    driver: bridge
